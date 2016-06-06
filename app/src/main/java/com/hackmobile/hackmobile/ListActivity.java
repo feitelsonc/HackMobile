@@ -20,24 +20,31 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class ListActivity extends AppCompatActivity implements ImageSourceOptionListener {
     private static final String LOG_TAG = "ListActivity";
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
+    private ImageListAdapter adapter;
     private FloatingActionButton addImageButton;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     public String FILES = "FILES";
     private String imageFileName;
-
+    private Random rand;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        rand = new Random();
         setContentView(R.layout.activity_list);
 
 
@@ -60,8 +67,8 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
             }
         });
 
-//        // specify an adapter (see also next example)
-        ImageListAdapter adapter = new ImageListAdapter(this);
+        // specify an adapter (see also next example)
+        adapter = new ImageListAdapter(this);
         recyclerView.setAdapter(adapter);
     }
 
@@ -80,38 +87,55 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
                     try {
                         int currentIndex = Integer.parseInt(currentIndexStr);
                         if (currentIndex >= imageIndex) {
-                            imageIndex = currentIndex + 1;
+                            imageIndex = currentIndex;
                         }
                     } catch (Exception e) {}
                 }
             }
         }
+        imageIndex++;
 
         // Create an image filename
         String imageFile = Integer.valueOf(imageIndex).toString() + "_photo.jpg";
-
         // Create file
         File dir = new File(this.getExternalFilesDir(null) + "/" + "HackMobilePics");
         File image = new File(dir, imageFile);
+        Log.d(LOG_TAG, dir.toString());
+        image.getParentFile().mkdirs();
+        if (!image.exists()) {
+            boolean ret = image.createNewFile();
+            Log.d(LOG_TAG, "" + ret);
+        }
 
         // Save file path so it can be added to shared preferences after the image has been taken
+
         imageFileName = image.getAbsolutePath();
+
         return image;
+    }
+
+    private void addImageToSharedPrefs(String uri) {
+        SharedPreferences prefs = this.getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        String files = prefs.getString(FILES, "");
+        if (files.equals("")) {
+            editor.putString(FILES, uri);
+        }
+        else {
+            editor.putString(FILES, files + "\n" + uri);
+        }
+        editor.commit();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-
+            Log.d(LOG_TAG, imageFileName);
             // update photo list
-            SharedPreferences prefs = this.getPreferences(MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString(FILES, prefs.getString(FILES, "") + "\n" + imageFileName);
-            editor.commit();
+            addImageToSharedPrefs(imageFileName);
 
             // notify adapter that new photo has been taken and list should update
-//            mAdapter.updatePhotoCount(getPhotoTakenCount());
-//            mAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         }
 
         // update empty text appropriately
@@ -134,7 +158,9 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
             File photoFile = null;
             try {
                 photoFile = createImageFile();
+                Log.d(LOG_TAG, "done createImageFile");
             } catch (IOException e) {
+                Log.d(LOG_TAG, e.toString());
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -165,20 +191,41 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
                 for (int i = 0, size = responseHeaders.size(); i < size; i++) {
                     Log.d(LOG_TAG, responseHeaders.name(i) + ": " + responseHeaders.value(i));
                 }
-
-                String imageId = convertResponseToImageId(response.body().string());
+                String imageId = convertResponseToUrl(response);
                 ListActivity.this.receivedRandomImageId(imageId);
             }
         });
     }
-
-    public String convertResponseToImageId(String response) {
-        Log.d(LOG_TAG, response);
-        String url = ""; //TODO
+    public String convertResponseToUrl(Response response) {
+        String url = null;
+        try {
+            JSONObject responseJson = new JSONObject(response.body().string());
+            int ind = 0;
+            JSONArray data = responseJson.getJSONArray("data");
+            int length = data.length();
+            while(ind < length) {
+                JSONObject obj = data.getJSONObject(rand.nextInt(length));
+                if(!obj.getBoolean("is_album")) {
+                    url = obj.getString("link");
+                    break;
+                }
+                ind++;
+            }
+            Log.d(LOG_TAG, url);
+        } catch(IOException e) {
+            Log.d(LOG_TAG, e.toString());
+        } catch (JSONException e) {
+            Log.d(LOG_TAG, e.toString());
+        }
         return url;
     }
 
-    public void receivedRandomImageId(String imageId) {
-        //todo
+    public void receivedRandomImageId(final String url) {
+        runOnUiThread(new Thread(new Runnable() {
+            public void run() {
+                addImageToSharedPrefs(url);
+                adapter.notifyDataSetChanged();
+            }
+        }));
     }
 }

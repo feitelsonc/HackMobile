@@ -1,9 +1,9 @@
 package com.hackmobile.hackmobile;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,12 +12,13 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.ViewHolder> {
-
-    private int photoCount;
-    private Context ctx;
+    private String LOG_TAG = "ImageListAdapter";
+    private ListActivity activity;
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
@@ -32,14 +33,10 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
     }
 
     // Provide a suitable constructor
-    public ImageListAdapter(Context ctx) {
-        this.ctx = ctx;
+    public ImageListAdapter(ListActivity activity) {
+        this.activity = activity;
     }
 
-    // tell adapter how many items are in data set
-    public void updatePhotoCount(int count) {
-        photoCount = count;
-    }
 
     // Create new views (invoked by the layout manager)
     @Override
@@ -52,9 +49,11 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
+        SharedPreferences prefs = this.activity.getPreferences(Context.MODE_PRIVATE);
+        List<String> images = new ArrayList<>(Arrays.asList(prefs.getString(this.activity.FILES, "").split("\n")));
 
         // calculate size of dp margins in px
         Resources r = holder.mView.getResources();
@@ -67,7 +66,7 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
             params.setMargins(bigMargin, bigMargin, bigMargin, smallMargin);
         }
         // increase bottom margin for last item in list
-        else if (position == photoCount-1) {
+        else if (position == images.size()-1) {
             // increase bottom margin
             RecyclerView.LayoutParams params = (RecyclerView.LayoutParams)holder.mView.getLayoutParams();
             params.setMargins(bigMargin, smallMargin, bigMargin, bigMargin);
@@ -78,18 +77,24 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
             params.setMargins(bigMargin, smallMargin, bigMargin, smallMargin);
         }
 
-        // get path to image
-        File dir = new File(ctx.getExternalFilesDir(null) + "/" + "HackMobilePics");
-        final File image = new File(dir, "photo-" + Integer.valueOf(photoCount-position).toString() + ".jpg");
-        Log.d("Abs Path", image.getAbsolutePath().toString());
-
-        // update card with correct image
-        Picasso.with(ctx).load(image).centerCrop().resize(400, 800).into((ImageView) holder.mView.findViewById(R.id.image));
+        // get URI to image
+        if (images.size() > 0) {
+            final String imageUri = images.get(position);
+            // update card with correct image
+            Picasso.with(holder.mView.getContext()).load(imageUri).centerCrop().resize(400, 800).into((ImageView) holder.mView.findViewById(R.id.image));
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return photoCount;
+        SharedPreferences prefs = this.activity.getPreferences(Context.MODE_PRIVATE);
+        String imageString = prefs.getString(this.activity.FILES, "");
+        if(imageString.equals("")) {
+            return 0;
+        } else {
+            List<String> images = new ArrayList<>(Arrays.asList(imageString.split("\n")));
+            return images.size();
+        }
     }
 }
