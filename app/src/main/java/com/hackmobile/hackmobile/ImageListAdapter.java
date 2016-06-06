@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.content.Context;
 
 import com.squareup.picasso.Picasso;
 
@@ -17,8 +18,7 @@ import java.io.File;
 public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.ViewHolder> {
 
     private int photoCount;
-    private MainActivity activity;
-
+    private Context ctx;
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
@@ -33,9 +33,8 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
     }
 
     // Provide a suitable constructor
-    public ImageListAdapter(MainActivity activity, int photoCount) {
+    public ImageListAdapter(Context ctx, int photoCount) {
         this.photoCount = photoCount;
-        this.activity = activity;
     }
 
     // tell adapter how many items are in data set
@@ -81,22 +80,12 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
         }
 
         // get path to image
-        File dir = new File(activity.getExternalFilesDir(null) + "/" + "CS185Pics" + activity.getDeleteCount());
+        File dir = new File(ctx.getExternalFilesDir(null) + "/" + "HackMobilePics");
         final File image = new File(dir, "photo-" + Integer.valueOf(photoCount-position).toString() + ".jpg");
-
-        Log.d("cory", image.getAbsolutePath().toString());
+        Log.d("Abs Path", image.getAbsolutePath().toString());
 
         // update card with correct image
-        Picasso.with(activity).load(image).centerCrop().resize(400, 800).into((ImageView) holder.mView.findViewById(R.id.image));
-
-        // set onclick listener
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(activity, MultiTouch.class);
-                intent.putExtra(MultiTouch.IMAGE_PATH, image.getAbsolutePath());
-                activity.startActivity(intent);
-            }
-        });
+        Picasso.with(ctx).load(image).centerCrop().resize(400, 800).into((ImageView) holder.mView.findViewById(R.id.image));
     }
 
 

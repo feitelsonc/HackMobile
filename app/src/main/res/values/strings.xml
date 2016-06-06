@@ -4,4 +4,8 @@
     <string name="button_text">Launch new activity</string>
     <string name="list_activity_title">Image List</string>
     <string name="empty_list">No Images Found</string>
+    <string name="choose_image_src">Choose Image Source</string>
+    <string name="imgur_src">Imgur</string>
+    <string name="camera_src">Camera</string>
+
 </resources>
