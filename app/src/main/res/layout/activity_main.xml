@@ -13,18 +13,19 @@
         android:id="@+id/hello_world_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world"
-        android:textSize="24sp"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:text="@string/hello_world"
         android:textColor="@color/colorPrimary"
-        android:textStyle="bold"/>
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
     <Button
+        android:id="@+id/hello_world_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/button_text"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_margin="16dp"/>
+        android:layout_margin="16dp"
+        android:text="@string/button_text" />
 </RelativeLayout>
