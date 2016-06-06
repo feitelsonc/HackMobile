@@ -8,7 +8,7 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button launch_button;
+    private Button launchButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,9 +16,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // initialize button
-        launch_button = (Button)findViewById(R.id.hello_world_launch_button);
+        launchButton = (Button)findViewById(R.id.hello_world_launch_button);
         // setup button's click action
-        launch_button.setOnClickListener(new View.OnClickListener() {
+        launchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, ListActivity.class);
