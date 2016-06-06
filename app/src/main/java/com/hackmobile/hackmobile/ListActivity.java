@@ -1,5 +1,6 @@
 package com.hackmobile.hackmobile;
 
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -9,8 +10,15 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ListActivity extends AppCompatActivity implements ImageSourceOptionListener {
-
+    private static final String LOG_TAG = "ListActivity";
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
     private FloatingActionButton addImageButton;
@@ -53,8 +61,8 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
         });
 
 //        // specify an adapter (see also next example)
-//        mAdapter = new MyAdapter(this, getPhotoTakenCount());
-//        recyclerView.setAdapter(mAdapter);
+        ImageListAdapter adapter = new ImageListAdapter(this);
+        recyclerView.setAdapter(adapter);
     }
 
     private File createImageFile() throws IOException {
@@ -110,10 +118,10 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
 //        updateEmptyText();
     }
 
-
     @Override
     public void onImgurChoice() {
         Toast.makeText(this, "Imgur chosen", Toast.LENGTH_LONG).show();
+        fetchRandomImageId();
 
     }
 
@@ -134,5 +142,43 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         }
+    }
+
+    public void fetchRandomImageId() {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("https://api.imgur.com/3/gallery/random/random/0")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (!response.isSuccessful())
+                    throw new IOException("Unexpected code " + response);
+
+                Headers responseHeaders = response.headers();
+                for (int i = 0, size = responseHeaders.size(); i < size; i++) {
+                    Log.d(LOG_TAG, responseHeaders.name(i) + ": " + responseHeaders.value(i));
+                }
+
+                String imageId = convertResponseToImageId(response.body().string());
+                ListActivity.this.receivedRandomImageId(imageId);
+            }
+        });
+    }
+
+    public String convertResponseToImageId(String response) {
+        Log.d(LOG_TAG, response);
+        String url = ""; //TODO
+        return url;
+    }
+
+    public void receivedRandomImageId(String imageId) {
+        //todo
     }
 }

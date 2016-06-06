@@ -23,6 +23,6 @@
             android:parentActivityName=".MainActivity"
             android:label="@string/list_activity_title">
         </activity>
+        <uses-permission android:name="android.permission.INTERNET" />
     </application>
-
 </manifest>
