@@ -33,8 +33,8 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
     }
 
     // Provide a suitable constructor
-    public ImageListAdapter(Context ctx, int photoCount) {
-        this.photoCount = photoCount;
+    public ImageListAdapter(Context ctx) {
+        this.ctx = ctx;
     }
 
     // tell adapter how many items are in data set
@@ -87,7 +87,6 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
         // update card with correct image
         Picasso.with(ctx).load(image).centerCrop().resize(400, 800).into((ImageView) holder.mView.findViewById(R.id.image));
     }
-
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
