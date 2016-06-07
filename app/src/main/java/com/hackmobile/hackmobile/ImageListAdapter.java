@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,7 +82,9 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
         if (images.size() > 0) {
             final String imageUri = images.get(position);
             // update card with correct image
-            Picasso.with(holder.mView.getContext()).load(imageUri).centerCrop().resize(400, 800).into((ImageView) holder.mView.findViewById(R.id.image));
+            Picasso.with(holder.mView.getContext()).load(imageUri).centerCrop().resize(800, 400).into((ImageView) holder.mView.findViewById(R.id.image));
+
+            Log.d(LOG_TAG, "Loaded image " + imageUri + " at position " + position);
         }
     }
 

@@ -12,7 +12,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Headers;
@@ -67,7 +66,7 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
             }
         });
 
-        // specify an adapter (see also next example)
+        // specify an adapter
         adapter = new ImageListAdapter(this);
         recyclerView.setAdapter(adapter);
     }
@@ -87,13 +86,12 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
                     try {
                         int currentIndex = Integer.parseInt(currentIndexStr);
                         if (currentIndex >= imageIndex) {
-                            imageIndex = currentIndex;
+                            imageIndex = currentIndex + 1;
                         }
                     } catch (Exception e) {}
                 }
             }
         }
-        imageIndex++;
 
         // Create an image filename
         String imageFile = Integer.valueOf(imageIndex).toString() + "_photo.jpg";
@@ -103,12 +101,10 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
         Log.d(LOG_TAG, dir.toString());
         image.getParentFile().mkdirs();
         if (!image.exists()) {
-            boolean ret = image.createNewFile();
-            Log.d(LOG_TAG, "" + ret);
+            image.createNewFile();
         }
 
         // Save file path so it can be added to shared preferences after the image has been taken
-
         imageFileName = image.getAbsolutePath();
 
         return image;
@@ -144,9 +140,7 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
 
     @Override
     public void onImgurChoice() {
-        Toast.makeText(this, "Imgur chosen", Toast.LENGTH_LONG).show();
         fetchRandomImageId();
-
     }
 
     @Override
@@ -205,7 +199,7 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
             int length = data.length();
             while(ind < length) {
                 JSONObject obj = data.getJSONObject(rand.nextInt(length));
-                if(!obj.getBoolean("is_album")) {
+                if(!obj.getBoolean("is_album") & !obj.getString("link").contains(".gif") ) {
                     url = obj.getString("link");
                     break;
                 }
