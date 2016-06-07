@@ -190,6 +190,16 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
             }
         });
     }
+
+    private Boolean imgurImageIsType(JSONObject object, String type) {
+        try {
+            return object.getString("type").toLowerCase().contains(type);
+        } catch (JSONException e) {
+            Log.d(LOG_TAG, e.toString());
+            return false;
+        }
+    }
+
     public String convertResponseToUrl(Response response) {
         String url = null;
         try {
@@ -199,7 +209,7 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
             int length = data.length();
             while(ind < length) {
                 JSONObject obj = data.getJSONObject(rand.nextInt(length));
-                if(!obj.getBoolean("is_album") & !obj.getString("link").contains(".gif") ) {
+                if(!obj.getBoolean("is_album") && !obj.getBoolean("nsfw") && (imgurImageIsType(obj, "jpeg") || imgurImageIsType(obj, "jpg") || imgurImageIsType(obj, "png"))) {
                     url = obj.getString("link");
                     break;
                 }
