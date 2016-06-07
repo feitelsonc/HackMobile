@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Headers;
@@ -36,6 +37,7 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
     private LinearLayoutManager layoutManager;
     private ImageListAdapter adapter;
     private FloatingActionButton addImageButton;
+    private TextView emptyText;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     public String FILES = "FILES";
     private String imageFileName;
@@ -46,7 +48,9 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
         rand = new Random();
         setContentView(R.layout.activity_list);
 
-
+        // init empty text
+        emptyText = (TextView)findViewById(R.id.empty);
+        updateEmptyText();
 
         // init recycler view
         recyclerView = (RecyclerView)findViewById(R.id.image_list);
@@ -69,6 +73,16 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
         // specify an adapter
         adapter = new ImageListAdapter(this);
         recyclerView.setAdapter(adapter);
+    }
+
+    private void updateEmptyText() {
+        SharedPreferences prefs = this.getPreferences(MODE_PRIVATE);
+        if (prefs.getString(FILES, "").equals("")) {
+            emptyText.setVisibility(View.VISIBLE);
+        }
+        else {
+            emptyText.setVisibility(View.GONE);
+        }
     }
 
     private File createImageFile() throws IOException {
@@ -136,10 +150,8 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
 
             // notify adapter that new photo has been taken and list should update
             adapter.notifyDataSetChanged();
+            updateEmptyText();
         }
-
-        // update empty text appropriately
-//        updateEmptyText();
     }
 
     @Override
@@ -224,6 +236,7 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
             public void run() {
                 addImageToSharedPrefs(url);
                 adapter.notifyDataSetChanged();
+                updateEmptyText();
             }
         }));
     }
