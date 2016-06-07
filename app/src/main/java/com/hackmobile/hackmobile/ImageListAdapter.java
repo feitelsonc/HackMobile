@@ -82,8 +82,11 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
         if (images.size() > 0) {
             final String imageUri = images.get(position);
             // update card with correct image
-            Picasso.with(holder.mView.getContext()).load(imageUri).centerCrop().resize(800, 400).into((ImageView) holder.mView.findViewById(R.id.image));
-
+            Picasso.with(holder.mView.getContext())
+                    .load(imageUri)
+                    .centerCrop()
+                    .resize(800, 400)
+                    .into((ImageView)holder.mView.findViewById(R.id.image));
             Log.d(LOG_TAG, "Loaded image " + imageUri + " at position " + position);
         }
     }
@@ -97,6 +100,7 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
             return 0;
         } else {
             List<String> images = new ArrayList<>(Arrays.asList(imageString.split("\n")));
+            Log.d(LOG_TAG, "List of images = " + images.toString());
             return images.size();
         }
     }
