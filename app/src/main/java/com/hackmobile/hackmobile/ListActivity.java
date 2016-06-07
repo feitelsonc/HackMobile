@@ -80,7 +80,9 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
         if (images.size() > 0) {
             for (int i = 0; i < images.size(); i++) {
                 String imageUri = images.get(i);
-                String[] imageUriParts = imageUri.split("_");
+                String[] absFileNameParts = imageUri.split("/");
+                String imageRelativeFileName = absFileNameParts[absFileNameParts.length-1];
+                String[] imageUriParts = imageRelativeFileName.split("_");
                 if (imageUriParts.length > 1) {
                     String currentIndexStr = imageUriParts[0];
                     try {
@@ -88,7 +90,9 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
                         if (currentIndex >= imageIndex) {
                             imageIndex = currentIndex + 1;
                         }
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                        Log.d(LOG_TAG, "PARSING ERROR - " + e.toString());
+                    }
                 }
             }
         }
@@ -105,7 +109,7 @@ public class ListActivity extends AppCompatActivity implements ImageSourceOption
         }
 
         // Save file path so it can be added to shared preferences after the image has been taken
-        imageFileName = image.getAbsolutePath();
+        imageFileName = "file:"+image.getAbsolutePath();
 
         return image;
     }
